@@ -1,0 +1,13 @@
+pref-title = TransLit Settings
+pref-deepseek-api-key = DeepSeek API Key
+pref-deepseek-base-url = DeepSeek Base URL
+pref-deepseek-prompt = DeepSeek Prompt Template
+pref-deepseek-prompt-help = Supported placeholders: title, itemKey, content. If content is omitted, full text will be appended automatically.
+pref-deepseek-model-note = Model is fixed to deepseek-reasoner for this stage.
+pref-mineru-title = MinerU Parsing Settings
+pref-mineru-api-token = MinerU API Token
+pref-mineru-base-url = MinerU Base URL
+pref-mineru-model-version = MinerU Model Version
+pref-mineru-model-version-help = Supported values: pipeline or vlm. Use MinerU-HTML for HTML files.
+pref-mineru-note = The plugin currently uses batch upload API: request upload URL, wait for parsing, and download ZIP result.
+pref-help = { $name } Build { $version } { $time }

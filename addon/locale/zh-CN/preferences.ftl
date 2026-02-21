@@ -1,0 +1,13 @@
+pref-title = TransLit 设置
+pref-deepseek-api-key = DeepSeek API Key
+pref-deepseek-base-url = DeepSeek Base URL
+pref-deepseek-prompt = DeepSeek 提示词模板
+pref-deepseek-prompt-help = 支持占位符 title、itemKey、content；如果不写 content，将自动把全文追加到提示词末尾。
+pref-deepseek-model-note = 当前阶段模型固定为 deepseek-reasoner。
+pref-mineru-title = MinerU 解析设置
+pref-mineru-api-token = MinerU API Token
+pref-mineru-base-url = MinerU Base URL
+pref-mineru-model-version = MinerU 模型版本
+pref-mineru-model-version-help = 可选值：pipeline 或 vlm；如果解析 HTML，请使用 MinerU-HTML。
+pref-mineru-note = 目前使用官方批量上传接口：先申请上传链接，再自动排队解析并下载 ZIP 结果。
+pref-help = { $name } Build { $version } { $time }

@@ -1,0 +1,94 @@
+<linkset>
+  <html:link rel="localization" href="__addonRef__-preferences.ftl" />
+</linkset>
+
+<groupbox
+  id="zotero-prefpane-__addonRef__-settings"
+  onload="Zotero.__addonInstance__.hooks.onPrefsEvent('load', { window })"
+>
+  <label><html:h2 data-l10n-id="pref-title"></html:h2></label>
+
+  <vbox>
+    <html:label
+      for="zotero-prefpane-__addonRef__-deepseek-api-key"
+      data-l10n-id="pref-deepseek-api-key"
+    ></html:label>
+    <html:input
+      type="password"
+      id="zotero-prefpane-__addonRef__-deepseek-api-key"
+      autocomplete="off"
+    ></html:input>
+  </vbox>
+
+  <vbox>
+    <html:label
+      for="zotero-prefpane-__addonRef__-deepseek-base-url"
+      data-l10n-id="pref-deepseek-base-url"
+    ></html:label>
+    <html:input
+      type="text"
+      id="zotero-prefpane-__addonRef__-deepseek-base-url"
+    ></html:input>
+  </vbox>
+
+  <vbox>
+    <html:label
+      for="zotero-prefpane-__addonRef__-deepseek-prompt"
+      data-l10n-id="pref-deepseek-prompt"
+    ></html:label>
+    <html:textarea
+      id="zotero-prefpane-__addonRef__-deepseek-prompt"
+      rows="12"
+      style="width: 100%"
+    ></html:textarea>
+    <html:p data-l10n-id="pref-deepseek-prompt-help"></html:p>
+  </vbox>
+
+  <html:p data-l10n-id="pref-deepseek-model-note"></html:p>
+
+  <label><html:h3 data-l10n-id="pref-mineru-title"></html:h3></label>
+
+  <vbox>
+    <html:label
+      for="zotero-prefpane-__addonRef__-mineru-api-token"
+      data-l10n-id="pref-mineru-api-token"
+    ></html:label>
+    <html:input
+      type="password"
+      id="zotero-prefpane-__addonRef__-mineru-api-token"
+      autocomplete="off"
+    ></html:input>
+  </vbox>
+
+  <vbox>
+    <html:label
+      for="zotero-prefpane-__addonRef__-mineru-base-url"
+      data-l10n-id="pref-mineru-base-url"
+    ></html:label>
+    <html:input
+      type="text"
+      id="zotero-prefpane-__addonRef__-mineru-base-url"
+    ></html:input>
+  </vbox>
+
+  <vbox>
+    <html:label
+      for="zotero-prefpane-__addonRef__-mineru-model-version"
+      data-l10n-id="pref-mineru-model-version"
+    ></html:label>
+    <html:input
+      type="text"
+      id="zotero-prefpane-__addonRef__-mineru-model-version"
+    ></html:input>
+    <html:p data-l10n-id="pref-mineru-model-version-help"></html:p>
+  </vbox>
+
+  <html:p data-l10n-id="pref-mineru-note"></html:p>
+</groupbox>
+
+<vbox>
+  <html:label
+    data-l10n-id="pref-help"
+    data-l10n-args='{"time": "__buildTime__","name": "__addonName__","version":"__buildVersion__"}'
+  ></html:label>
+</vbox>

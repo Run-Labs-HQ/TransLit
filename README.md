@@ -11,7 +11,7 @@ This repository is maintained at:
 
 ## Latest Release
 
-- Current version: `3.2.1`
+- Current version: `3.2.0`
 - Release notes: `CHANGELOG.md`
 
 ## What It Does

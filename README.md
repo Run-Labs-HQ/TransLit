@@ -29,8 +29,10 @@ This repository is maintained at:
   - Drag-to-pan when zoomed
   - Chinese captions display
 - Manually adjust MinerU visual crops against original PDF pages (`调整图表截图（MinerU）`)
-  - Uses external PDF page renderer (Python + PyMuPDF) as primary path
+  - Uses external PDF page renderer as primary path
+  - Pre-renders all PDF pages in one renderer run before interaction
   - Supports page override (`页-1` / `页+1`) when source page index is unreliable
+  - Overwrites images in the existing MinerU ZIP attachment after confirmation
 - Export a translated PDF that includes:
   - Full translated body text
   - Figure/table image placed directly above each caption entry
@@ -42,7 +44,9 @@ This repository is maintained at:
 - Node.js LTS (for development)
 - A valid DeepSeek API key
 - A valid MinerU API token
-- Python 3 + PyMuPDF (`pip install pymupdf`) for robust visual crop adjustment
+- One PDF page renderer path configured in preferences (recommended)
+  - Recommended: `translit_pdf_page_renderer.exe`
+  - Alternative: Python 3 + PyMuPDF (`pip install pymupdf`) with env fallback
 
 ## Install for Development
 
@@ -114,9 +118,11 @@ npm run test -- --no-watch
 3. In adjustment dialog:
    - Left panel: original PDF page for red-box recrop
    - Right panel: current extracted image + caption reference
-   - Pages are pre-rendered in one external renderer run before interaction
+   - Pages are pre-rendered in one external renderer run before interaction (not per-page subprocess)
    - `页-1` / `页+1` to override source page index when needed
 4. Click `完成并应用` to overwrite images in existing MinerU ZIP attachment.
+
+If pre-render fails, the dialog will stop with explicit error messages instead of falling back to uncertain preview sources.
 
 ### 5) One-click Workflow
 
@@ -137,7 +143,7 @@ Open Zotero plugin preferences for TransLit and configure:
 - MinerU API Token
 - MinerU Base URL
 - MinerU Model Version
-- PDF page renderer executable path (recommended for visual crop adjustment)
+- PDF page renderer executable path (recommended for visual crop adjustment; overrides env var)
 - Headless browser executable path (optional, for PDF export)
 - PDF font family
 - PDF body font size (pt)
@@ -151,7 +157,19 @@ Optional environment variable:
   - Used only when preference `PDF page renderer executable path` is empty
   - Default fallback chain: `python` -> `python3` -> `py -3` -> `py`
   - You can point this to a packaged renderer executable if desired
-  - Renderer CLI contract: `--pdf <path> --page <index0> --scale <float> --out <png>`
+  - Renderer CLI contract:
+    - Single page: `--pdf <path> --page <index0> --scale <float> --out <png>`
+    - Page count: `--pdf <path> --page-count`
+    - All pages: `--pdf <path> --scale <float> --all-pages-dir <dir>`
+
+## Troubleshooting
+
+- `NS_ERROR_FILE_UNRECOGNIZED_PATH` while rendering pages:
+  - Set `PDF page renderer executable path` in preferences to an absolute executable path.
+  - Avoid relying on shell-only commands (e.g., plain `python`) on restrictive systems.
+- `PDF pre-render failed: no page image generated`:
+  - Verify renderer executable can run manually on the same PDF.
+  - Check path permissions for Zotero temp directory.
 
 Prompt placeholders:
 

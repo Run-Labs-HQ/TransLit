@@ -1,5 +1,17 @@
 # Changelog
 
+## Unreleased
+
+- Added standalone menu action `调整图表截图（MinerU）` for post-extraction visual crop refinement without rerunning extraction.
+- Switched crop-review page rendering to external renderer first, with one-shot all-page pre-render before interaction.
+- Added renderer executable preference `PDF page renderer executable path` (preferred over `TRANSLIT_PDF_RENDER_COMMAND`).
+- Removed blue bbox overlay from manual crop dialog to avoid misleading references on noisy MinerU bbox data.
+- Added stricter pre-render failure messages instead of silent fallback to uncertain preview sources.
+- Added `scripts/pdfPageRenderer/render_pdf_page.py` capabilities:
+  - `--page-count`
+  - `--all-pages-dir`
+  - single-page output mode (existing)
+
 ## v3.2.1 - 2026-02-23
 
 - Fixed figure numbering shift caused by front-matter non-body images (e.g., cover overview, author portraits).

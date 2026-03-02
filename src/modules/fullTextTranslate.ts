@@ -1,8 +1,14 @@
 import { config } from "../../package.json";
 import { getString } from "../utils/locale";
 import { getSecret } from "../utils/secureStore";
+import {
+  getMenuVisibilityPref,
+  MENU_VISIBILITY_DEFAULTS,
+  MENU_VISIBILITY_PREF_KEYS,
+} from "./menuVisibility";
 
 const MENU_ID = `zotero-itemmenu-${config.addonRef}-translate-fulltext`;
+const MENU_ID_DEFAULT_PROMPT = `zotero-itemmenu-${config.addonRef}-translate-fulltext-default-prompt`;
 const DEEPSEEK_MODEL = "deepseek-reasoner";
 const DEEPSEEK_TIMEOUT_MS = 10 * 60 * 1000;
 const DEFAULT_DEEPSEEK_BASE_URL = "https://api.deepseek.com";
@@ -15,58 +21,62 @@ const PREF_KEYS = {
 const DEFAULT_PROMPT_TEMPLATE = [
   "# Role: 资深学术翻译专家与 Markdown 排版专家",
   "",
-  "## Objective",
+  "## Profile",
   "",
-  "将我提供的英文学术文献内容翻译成流畅、准确的简体中文，并使用通用标准 Markdown 进行排版。输出结果需满足直接在任意 Markdown 编辑器中复制、阅读与做笔记的需求。",
+  "您是一位精通英文学术文献翻译与结构化排版的专家。您的核心任务是将用户提供的英文学术内容，精准地转化为符合中文学术写作规范的简体中文，并运用标准的 Markdown 语法进行清晰、专业的排版，确保输出文档可直接用于阅读、编辑与知识整理。",
   "",
-  "## Core Guidelines (核心原则)",
+  "## Skills",
   "",
-  "1. **学术严谨与术语一致**",
+  "1. **精准翻译与术语管理**：准确翻译学术文本，对关键术语、材料、方法名称等保持全文译法一致，并在首次出现时附注英文原文。",
+  "2. **句子结构与逻辑重组**：擅长处理英文长难句，能将其拆解重组为符合中文表达习惯的流畅句式，同时严格保持原意与逻辑关系。",
+  "3. **格式规范与自动化处理**：精通学术文献中的图表引用、文献引用、数学公式等特殊元素的处理规则，并能将其自动化、标准化地转换为目标格式。",
+  "4. **Markdown 深度应用**：熟练使用 Markdown 语法进行文档结构化，并严格遵循语法边界规则，确保文档在任何兼容编辑器中都能被正确渲染。",
   "",
-  "   - 保持客观、严谨的科学语调，符合中文学术写作规范。",
-  "   - 遇到关键专业术语、缩写、材料名称或专有名词，在**首次出现**的中文译名后用半角括号保留英文原文，例如：水性聚氨酯 (Waterborne Polyurethane, WPU)。",
-  "   - 同一术语在全文必须保持译法一致。",
+  "## Rules",
   "",
-  "2. **长难句与语境处理**",
+  "1. 翻译必须保持客观、严谨的学术语调。",
+  "2. 所有输出均为纯 Markdown 文本，不包含任何解释性、寒暄性语言。",
+  "3. 必须严格遵循下方“核心工作规范”中的所有格式与内容要求。",
   "",
-  "   - 自动修复因 OCR 导致的断行、连字符断词等轻微错误。",
-  "   - 在不改变原意与逻辑的前提下，拆分或重组超长难句，使其符合中文学术阅读习惯。",
+  "## 核心工作规范",
   "",
-  "## Formatting Constraints (排版与格式规范)",
+  "### 翻译范围",
+  "标题",
+  "摘要",
+  "正文",
+  "图表注",
   "",
-  "1. **图注与表注处理（绝对规则）**",
-  "   - 密切关注原文的图注与表注（如 Figure 1, Table 1），**准确提取序号**。",
-  "   - **不要**在正文翻译中留下任何图片/表格占位符。",
-  "   - **所有图注与表注必须统一集中在全文末尾输出**，按序号递增排列。",
-  "   - 文末格式严格如下：",
+  "忽略作者、机构以及其他与正文无关的信息。",
+  "正文里不要有表图注，表图注全部放在正文后面。",
+  "有的文献有方法章节也算作正文。",
+  "不需要翻译表格的内容。",
   "",
-  "     **图 1：** [此处为图注中文翻译，如有术语首次出现同样保留英文，字体不用加粗]",
-  "     **表 1：** [此处为表注中文翻译，字体不用加粗]",
+  "### 翻译与正文排版",
+  "1. **术语处理**：关键专业术语、缩写、材料名称或专有名词，在**首次出现**时，其中文译名后需用半角括号附上英文原文，例如：水性聚氨酯 (Waterborne Polyurethane, WPU)。同一术语全文译法必须一致。",
+  "2. **句子优化**：自动修复因 OCR 导致的断行、连字符错误。在不改变原意与逻辑的前提下，可拆分或重组超长英文句子，使其符合中文阅读习惯。",
+  "3. **文献引用格式（必须严格遵守）**：",
+  "   - **数字标号引用** (如 `[1]`, `[3-5]`)：必须渲染为 HTML 上标，格式为 `<sup>[1]</sup>`。",
+  "   - **作者-年份引用** (如 `(Smith et al., 2026)`)：保持原样纯文本输出，**不**做上标，**不**翻译括号内的作者名与年份。",
+  "   - **全局省略参考文献列表**：若原文末尾有“References”或“Bibliography”章节，请彻底抛弃，不予翻译和输出。",
+  "4. **公式处理**：所有数学/物理公式需转换为标准 LaTeX 语法。",
+  "   - 行内公式：使用 `$公式$`（符号与公式间无空格）。",
+  "   - 独立公式：使用 `$$公式$$`，并可保留原编号 (如 `(1)`)。",
+  "5. **图表引用占位符（重要）**：正文翻译中如遇图、表引用 (如 `Figure 1`, `Table 1`)，**不要**留下任何图片/表格占位符或插入语句。仅需准确识别并提取其序号与注释内容，为后续集中处理做准备。",
+  "6. **图表引用翻译规范**：",
+  "   - **正文中的图表**：`Figure X` / `Table X` 翻译为 **“图 X”** / **“表 X”**。",
+  "   - **补充材料中的图表**：`Figure SX` / `Table SX` 翻译为 **“图 SX”** / **“表 SX”**。",
   "",
-  "2. **文献引用格式（红线要求，100% 完整保留）**",
+  "### 文末集中处理图注与表注",
+  "1. 在完成全文正文翻译后，**将所有提取到的图注 (Figure Caption) 和表注 (Table Caption) 集中放置在文档末尾**。",
+  "2. 按图表类型及序号递增顺序排列。",
+  "3. 格式严格如下：",
+  "   **图 X：** [此处为图注的完整中文翻译，术语处理原则同正文，不加粗]",
+  "   **表 X：** [此处为表注的完整中文翻译，术语处理原则同正文，不加粗]",
   "",
-  "   - **数字标号引用**（如 `[1]`, `[3-5]`）：必须渲染为 HTML 上标，格式为 `<sup>[1]</sup>`。",
-  "   - **作者-年份引用**（如 `(Smith et al., 2026)`）：保持原样纯文本输出，**不**做上标，**不**翻译括号内的作者名与年份。",
-  "   - 中英文语序调整时，确保引用标号准确锚定在对应核心概念之后，或置于句末标点之前。",
-  "   - **全局省略参考文献列表**：如果原文末尾包含 Reference/Bibliography 部分，请在输出时彻底抛弃，不予翻译和输出。",
-  "",
-  "3. **公式处理**",
-  "   - 所有数学/物理公式转换为标准 LaTeX 语法。",
-  "   - 行内公式：`$公式$`（符号与公式之间无空格）。",
-  "   - 独立公式：`$$公式$$`。",
-  "   - 保留原公式符号、上下标、单位与编号（如 `(1)` 放在同行右侧）。",
-  "",
-  "4. **Markdown 标记符边界（防止渲染失效）**",
-  "   - 格式标记符（如 `**加粗**`、`*斜体*`）内部**绝对不能**有空格。错误示范：`** 加粗 **`；正确示范：`**加粗**`。",
-  "   - 当格式化文本与常规文本、标点符号相连时，确保遵循标准 Markdown 解析规则，避免在标点符号前异常使用空格。",
-  "   - 严格保留原文献的标题层级（`#`、`##`）、公式编号与段落划分。",
-  "",
-  "## Workflow",
-  "",
-  "1. 接收输入的英文文献内容。",
-  "2. 翻译并排版正文文本，保留正确的引用格式和 LaTeX 公式。",
-  "3. 收集所有图注/表注并翻译。",
-  "4. **直接输出 Markdown 纯文本结果。不要任何寒暄、不要解释说明、不要包含参考文献列表。正文结束后，紧接着输出集中的图/表注。**",
+  "### Markdown 格式质检",
+  "1. 确保所有 Markdown 标记符边界清晰，内部无多余空格。例如，加粗应为 `**文本**` 而非 `** 文本 **`。",
+  "2. 严格保留原文的标题层级结构 (使用 `#`, `##`, `###` 等)。",
+  "3. 确保格式化文本与相邻标点符号之间遵循标准语法，避免因空格导致渲染异常。",
   "",
   "",
   "原文如下:",
@@ -114,10 +124,37 @@ export class FullTextTranslateFactory {
       tag: "menuitem",
       id: MENU_ID,
       label: getString("menuitem-translate-fulltext"),
+      isHidden: () =>
+        !getMenuVisibilityPref(
+          MENU_VISIBILITY_PREF_KEYS.translateFullText,
+          MENU_VISIBILITY_DEFAULTS.translateFullText,
+        ),
       commandListener: async () => {
         await this.translateSelectedItems();
       },
     });
+
+    ztoolkit.Menu.register("item", {
+      tag: "menuitem",
+      id: MENU_ID_DEFAULT_PROMPT,
+      label: getString("menuitem-translate-fulltext-default-prompt"),
+      isHidden: () =>
+        !getMenuVisibilityPref(
+          MENU_VISIBILITY_PREF_KEYS.translateFullTextDefaultPrompt,
+          MENU_VISIBILITY_DEFAULTS.translateFullTextDefaultPrompt,
+        ),
+      commandListener: async () => {
+        await this.translateSelectedItems({
+          forceDefaultPrompt: true,
+        });
+      },
+    });
+  }
+
+  static async runSelectedItems(options?: {
+    forceDefaultPrompt?: boolean;
+  }): Promise<void> {
+    await this.translateSelectedItems(options);
   }
 
   private static getPrefString(prefKey: string, fallback = ""): string {
@@ -134,7 +171,11 @@ export class FullTextTranslateFactory {
     return String(pref);
   }
 
-  private static async translateSelectedItems(): Promise<void> {
+  private static async translateSelectedItems(options?: {
+    forceDefaultPrompt?: boolean;
+  }): Promise<void> {
+    const forceDefaultPrompt = Boolean(options?.forceDefaultPrompt);
+
     if (this.translating) {
       this.showToast(getString("translate-busy"), "default");
       return;
@@ -177,10 +218,9 @@ export class FullTextTranslateFactory {
 
           const processedText = this.removeReferencesSection(rawText);
 
-          const promptTemplate = this.getPrefString(
-            PREF_KEYS.prompt,
-            DEFAULT_PROMPT_TEMPLATE,
-          );
+          const promptTemplate = forceDefaultPrompt
+            ? DEFAULT_PROMPT_TEMPLATE
+            : this.getPrefString(PREF_KEYS.prompt, DEFAULT_PROMPT_TEMPLATE);
           const prompt = this.buildPrompt(
             promptTemplate,
             targetItem,

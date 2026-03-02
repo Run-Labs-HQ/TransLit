@@ -2,6 +2,8 @@ import { BasicExampleFactory } from "./modules/examples";
 import { registerPrefsScripts } from "./modules/preferenceScript";
 import { FullTextTranslateFactory } from "./modules/fullTextTranslate";
 import { MinerUExtractFactory } from "./modules/mineruExtract";
+import { OneClickWorkflowFactory } from "./modules/oneClickWorkflow";
+import { TranslatedPdfExportFactory } from "./modules/translatedPdfExport";
 import { initLocale } from "./utils/locale";
 import { createZToolkit } from "./utils/ztoolkit";
 
@@ -13,6 +15,7 @@ async function onStartup() {
   ]);
 
   initLocale();
+  MinerUExtractFactory.cleanupLegacyPrefs();
   BasicExampleFactory.registerPrefs();
 
   await Promise.all(
@@ -31,6 +34,8 @@ async function onMainWindowLoad(win: _ZoteroTypes.MainWindow): Promise<void> {
 
   FullTextTranslateFactory.registerItemMenu();
   MinerUExtractFactory.registerItemMenu();
+  TranslatedPdfExportFactory.registerItemMenu();
+  OneClickWorkflowFactory.registerItemMenu();
 }
 
 async function onMainWindowUnload(_win: Window): Promise<void> {

@@ -20,8 +20,34 @@ function createLoginInfo(username: string, password: string): nsILoginInfo {
   const loginInfo = (Components.classes as any)[
     "@mozilla.org/login-manager/loginInfo;1"
   ].createInstance(Components.interfaces.nsILoginInfo) as nsILoginInfo;
-  loginInfo.init(SECRET_ORIGIN, "", SECRET_REALM, username, password, "", "");
+  loginInfo.init(
+    SECRET_ORIGIN,
+    null as unknown as string,
+    SECRET_REALM,
+    username,
+    password,
+    "",
+    "",
+  );
   return loginInfo;
+}
+
+function findLoginsByOriginAndRealm(
+  loginManager: nsILoginManager,
+  origin: string,
+  realm: string,
+): nsILoginInfo[] {
+  const logins = loginManager.findLogins(
+    origin,
+    null as unknown as string,
+    realm,
+  ) as nsILoginInfo[];
+
+  if (logins.length) {
+    return logins;
+  }
+
+  return loginManager.findLogins(origin, "", realm) as nsILoginInfo[];
 }
 
 function getPrefByPrefix(prefPrefix: string, prefKey: string): string {
@@ -53,11 +79,7 @@ function getSecretByOrigin(
   origin: string,
   secretName: string,
 ): nsILoginInfo | null {
-  const logins = loginManager.findLogins(
-    origin,
-    "",
-    SECRET_REALM,
-  ) as nsILoginInfo[];
+  const logins = findLoginsByOriginAndRealm(loginManager, origin, SECRET_REALM);
   return logins.find((it) => it.username === secretName) || null;
 }
 
@@ -66,11 +88,11 @@ async function upsertSecret(
   secretName: string,
   secretValue: string,
 ): Promise<void> {
-  const logins = loginManager.findLogins(
+  const logins = findLoginsByOriginAndRealm(
+    loginManager,
     SECRET_ORIGIN,
-    "",
     SECRET_REALM,
-  ) as nsILoginInfo[];
+  );
 
   for (const login of logins) {
     if (login.username === secretName) {
